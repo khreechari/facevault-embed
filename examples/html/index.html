@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FaceVault Embed — minimal example</title>
+</head>
+<body>
+  <h1>Verify your identity</h1>
+
+  <!--
+    The data-fv-token value MUST be minted by YOUR backend by calling
+    POST /api/v1/widget_sessions with your API key. Never put your API key
+    in client-side HTML. See ../fastapi or ../express for the server side;
+    those examples render this same markup with a real token injected.
+  -->
+  <button data-fv-token="REPLACE_WITH_WIDGET_TOKEN_FROM_YOUR_SERVER">
+    Verify with FaceVault
+  </button>
+
+  <pre id="log" style="margin-top:1rem;font-family:monospace"></pre>
+
+  <script src="https://app.facevault.id/embed.js" async></script>
+  <script>
+    function log(msg) {
+      document.getElementById('log').textContent += msg + '\n';
+    }
+    // FV is defined by embed.js once it loads; on() can be called immediately
+    // because embed.js attaches window.FV synchronously when it runs.
+    window.addEventListener('load', function () {
+      if (!window.FV) { log('embed.js failed to load'); return; }
+      FV.on('ready',    function (e) { log('ready: ' + e.session_id); });
+      FV.on('progress', function (e) { log('progress: ' + e.screen); });
+      FV.on('complete', function (e) {
+        // UX only — confirm server-side via webhook before trusting this.
+        log('complete: ' + e.decision + ' (' + e.session_id + ')');
+      });
+      FV.on('error',  function (e) { log('error: ' + e.code); });
+      FV.on('cancel', function ()  { log('cancelled'); });
+    });
+  </script>
+</body>
+</html>
