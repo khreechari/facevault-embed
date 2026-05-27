@@ -129,6 +129,22 @@ Modern evergreen browsers. Uses `MutationObserver`, `postMessage`, and iframe
 `allow="camera; microphone"`; degrades gracefully on very old browsers (buttons
 still work; auto-rebind is skipped).
 
+## Contributing
+
+Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the dev
+setup and ground rules (notably: keep the public `FV` API stable and `embed.js`
+dependency-free). By participating you agree to the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+Found a vulnerability? **Don't open a public issue** — see
+[SECURITY.md](SECURITY.md) and email `security@facevault.id`.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
-[MIT](LICENSE) © FaceVault
+[MIT](LICENSE) © Kaditham Holdings Pte Ltd

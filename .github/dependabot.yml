@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Keep the SHA-pinned GitHub Actions in CI / release workflows current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Example apps — so the docs don't drift onto vulnerable example deps.
+  - package-ecosystem: npm
+    directory: /examples/express
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: pip
+    directory: /examples/fastapi
+    schedule:
+      interval: weekly
