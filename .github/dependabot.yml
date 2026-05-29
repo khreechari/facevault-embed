@@ -6,13 +6,28 @@ updates:
     schedule:
       interval: weekly
 
-  # Example apps — so the docs don't drift onto vulnerable example deps.
+  # Example apps. The `ignore` rules suppress cosmetic version-bump PRs but
+  # NOT security advisories (those bypass ignore). Rationale: this repo is
+  # public; the example deps deliberately use loose lower bounds. Tightening
+  # them to match what facevault.id itself runs in production would narrow
+  # the attacker-visible CVE window for our actual API stack. So we let
+  # dependabot watch security but ignore cosmetic version drift.
   - package-ecosystem: npm
     directory: /examples/express
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
 
   - package-ecosystem: pip
     directory: /examples/fastapi
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "fastapi"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "uvicorn"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "httpx"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
