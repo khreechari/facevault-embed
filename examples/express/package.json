@@ -5,12 +5,18 @@
   "description": "Minimal Express server that mints a FaceVault widget token",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "vitest run"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "facevault": "^1.0.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.0"
   }
 }

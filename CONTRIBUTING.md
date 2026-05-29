@@ -22,7 +22,8 @@ it stable and safe.
 # FastAPI
 cd examples/fastapi
 pip install -r requirements.txt
-cp ../../.env.example .env   # fill in FACEVAULT_API_KEY + FACEVAULT_SITE_ID
+cp ../../.env.example .env   # fill in FACEVAULT_API_KEY, FACEVAULT_SITE_ID,
+                             # and FACEVAULT_WEBHOOK_SECRET (for the /webhook route)
 uvicorn app:app --reload
 
 # Express (Node 18+)
@@ -38,6 +39,9 @@ run the same checks locally before opening a PR:
 node --check embed.js
 node --check examples/express/server.js
 python3 -m py_compile examples/fastapi/app.py
+# Webhook handler tests (require deps installed in each example folder):
+( cd examples/fastapi && pytest -q )
+( cd examples/express && npm test )
 ```
 
 ## Pull requests

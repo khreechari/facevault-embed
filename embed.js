@@ -1,3 +1,4 @@
+/* facevault-embed v0.0.0-dev — https://github.com/khreechari/facevault-embed */
 /* FaceVault embed loader — drop-in script for customer pages.
  *
  * Usage:
