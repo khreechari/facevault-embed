@@ -75,7 +75,7 @@ Express are in [`examples/`](examples/).
 Any element with `[data-fv-token]` is auto-bound on load (and on DOM mutation, so
 dynamically-added buttons work too).
 
-### 3. Listen for the result
+### 3. Listen for the result *(UX only)*
 
 ```html
 <script>
@@ -91,9 +91,46 @@ dynamically-added buttons work too).
 </script>
 ```
 
-> The browser `decision` is for UX only — **always confirm the final result
-> server-side** via your webhook or by polling the session. Never grant access
-> based on a client-side event alone.
+The browser `decision` is for UX — show a "thanks, we got it" screen, hide
+a form, etc. **Don't grant access based on this event**; do that in step 4.
+
+### 4. Confirm via webhook *(source of truth)*
+
+When verification reaches a final state, FaceVault POSTs a webhook to the
+URL you configured in the dashboard. Verify the HMAC against the **raw**
+request body, then trust the `trust_decision` it carries.
+
+```python
+# FastAPI — see examples/fastapi/app.py for the full route.
+from facevault import parse_event, verify_signature
+
+@app.post("/webhook")
+async def webhook(request: Request):
+    body = await request.body()
+    sig = request.headers.get("X-FaceVault-Signature", "")
+    if not verify_signature(body, sig, WEBHOOK_SECRET):
+        raise HTTPException(400, "bad signature")
+    event = parse_event(body)
+    # Gate access in your own DB based on event.trust_decision
+    ...
+```
+
+```js
+// Express — see examples/express/server.js for the full route.
+const { verifySignature, parseEvent } = require("facevault");
+
+app.post("/webhook", express.raw({ type: "*/*" }), (req, res) => {
+  const sig = req.headers["x-facevault-signature"] || "";
+  if (!verifySignature(req.body, sig, WEBHOOK_SECRET)) {
+    return res.status(400).send("bad signature");
+  }
+  const event = parseEvent(req.body);
+  // Gate access in your own DB based on event.trustDecision
+  ...
+});
+```
+
+Install the SDK once: `pip install facevault` or `npm install facevault`.
 
 ## JavaScript API
 

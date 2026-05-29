@@ -1,23 +1,29 @@
-"""Minimal FastAPI server that mints a FaceVault widget token and renders the
-button. Run, open http://localhost:8000, click the button.
+"""Minimal FastAPI server that mints a FaceVault widget token, renders the
+button, and receives the verification webhook. Run, open http://localhost:8000,
+click the button. The verification result lands at POST /webhook.
 
     pip install -r requirements.txt
     export FACEVAULT_API_KEY=fv_live_...
     export FACEVAULT_SITE_ID=fvs_pk_...
+    export FACEVAULT_WEBHOOK_SECRET=whsec_...
     uvicorn app:app --reload
 
 The API key stays on the server — the browser only ever sees the single-use,
-5-minute widget_token.
+5-minute widget_token. Webhook signature verification is the source of truth
+for the verification outcome (the browser's `complete` event is UX only).
 """
 import os
 
 import httpx
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, PlainTextResponse
+
+from facevault import parse_event, verify_signature
 
 API_BASE = os.environ.get("FACEVAULT_API_BASE", "https://api.facevault.id/api/v1")
-API_KEY = os.environ["FACEVAULT_API_KEY"]       # fv_live_...
-SITE_ID = os.environ["FACEVAULT_SITE_ID"]       # fvs_pk_...
+API_KEY = os.environ["FACEVAULT_API_KEY"]                # fv_live_...
+SITE_ID = os.environ["FACEVAULT_SITE_ID"]                # fvs_pk_...
+WEBHOOK_SECRET = os.environ.get("FACEVAULT_WEBHOOK_SECRET", "")  # whsec_...
 EMBED_SRC = os.environ.get("FACEVAULT_EMBED_SRC", "https://app.facevault.id/embed.js")
 
 app = FastAPI()
@@ -49,9 +55,29 @@ async def home():
   <script>
     window.addEventListener('load', function () {{
       FV.on('complete', function (e) {{
-        // UX only — confirm via webhook server-side before trusting this.
-        alert('Decision: ' + e.decision);
+        // UX only — the /webhook handler below is the source of truth.
+        alert('Decision (UX): ' + e.decision);
       }});
     }});
   </script>
 </body></html>"""
+
+
+@app.post("/webhook", response_class=PlainTextResponse)
+async def webhook(request: Request):
+    """Receive a FaceVault webhook — the source of truth for the verification.
+
+    Verifies HMAC-SHA256 against the **raw** request body using the published
+    `facevault` Python SDK (raw-body verify is critical — re-serializing the
+    parsed JSON would change the bytes for non-ASCII payloads).
+    """
+    if not WEBHOOK_SECRET:
+        raise HTTPException(500, "FACEVAULT_WEBHOOK_SECRET is not configured")
+    body = await request.body()
+    signature = request.headers.get("X-FaceVault-Signature", "")
+    if not verify_signature(body, signature, WEBHOOK_SECRET):
+        raise HTTPException(400, "bad signature")
+    event = parse_event(body)
+    # In a real app: gate access in your own DB based on event.trust_decision.
+    print(f"[fv webhook] session={event.session_id} decision={event.trust_decision}")
+    return "ok"
