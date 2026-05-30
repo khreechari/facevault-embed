@@ -152,12 +152,10 @@ Install the SDK once: `pip install facevault` or `npm install facevault`.
 
 ## Pointing at a different environment
 
-`embed.js` opens the webapp on the **same origin it was loaded from**. Loading the
-script from `app.facevault.id` opens the webapp — keeping signing
-keys and sessions matched. To override explicitly:
+`embed.js` opens the webapp on the **same origin it was loaded from**. To override explicitly — e.g. for a self-hosted FaceVault deployment, or a custom CDN serving the loader — pass the target origin via `data-fv-origin`:
 
 ```html
-<script src="…/embed.js" data-fv-origin="https://app.facevault.id" async></script>
+<script src="https://app.facevault.id/embed.js" data-fv-origin="https://app.your-domain.com" async></script>
 ```
 
 ## Browser support

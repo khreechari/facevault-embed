@@ -29,10 +29,11 @@
 (function () {
     'use strict';
 
-    // Default the iframe origin to wherever this loader was served from. That
-    // way `<script src="https://app.facevault.id/embed.js">` opens the
-    // webapp — keeping signing keys / sessions matched up.
-    // Fallback to prod if we can't read the script src (very old browsers).
+    // Default the iframe origin to wherever this loader was served from, so
+    // a self-hosted or alternate-domain deployment opens its own webapp
+    // (matched signing keys / sessions). data-fv-origin overrides this
+    // explicitly. Fallback to prod if we can't read the script src (very
+    // old browsers).
     var EMBED_ORIGIN = 'https://app.facevault.id';
     try {
         var loader = document.currentScript;
